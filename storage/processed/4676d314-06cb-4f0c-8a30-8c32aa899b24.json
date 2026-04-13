@@ -1,0 +1,58 @@
+{
+  "document_id": "4676d314-06cb-4f0c-8a30-8c32aa899b24",
+  "status": "processed",
+  "source_file_name": "Mock_NSYMM_Lab_Requisition_V2.pdf",
+  "extraction_provider": "openai",
+  "extraction_model": "gpt-5.2",
+  "extraction_note": null,
+  "extracted_data": {
+    "patient_name": "MARIA SMITH",
+    "patient_id": "MRN-772210",
+    "age": 47,
+    "gender": "Female",
+    "doctor_name": "Dr. Sarah Jenkins",
+    "hospital_or_center_name": "Marin County Health Clinic",
+    "requisition_date": "04/13/2026",
+    "sample_type": "Blood (whole); Sputum; Serum",
+    "test_names": [
+      "Acid fast smear + culture",
+      "MTB/RIF PCR GeneXpert",
+      "Quantiferon TB Gold Plus",
+      "HIV screening",
+      "RPR syphilis screening"
+    ],
+    "test_codes": [],
+    "priority": null,
+    "contact_number": null,
+    "notes": "Patient presents with night sweats, weight loss, and chronic cough. TB screening and routine STI panel requested. History of travel to high-burden TB areas in 2024."
+  },
+  "confidence": {
+    "patient_name": 0.99,
+    "patient_id": 0.99,
+    "age": 0.99,
+    "gender": 0.99,
+    "doctor_name": 0.99,
+    "hospital_or_center_name": 0.99,
+    "requisition_date": 0.99,
+    "sample_type": 0.99,
+    "test_names": 0.99,
+    "test_codes": 0.0,
+    "priority": 0.0,
+    "contact_number": 0.0,
+    "notes": 0.99,
+    "extraction_confidence": 0.93
+  },
+  "validation": {
+    "status": "review_required",
+    "errors": [],
+    "warnings": [
+      "Sample type normalized suggestion: Blood",
+      "Mismatch between number of test names and test codes",
+      "Suspicious duplicate requisition found: 7bd7ffee-70ec-46f2-be57-eff2b7129398"
+    ]
+  },
+  "created_at": "2026-04-13T14:06:41.314913",
+  "updated_at": "2026-04-13T14:06:41.314921",
+  "approved_at": null,
+  "ocr_text": "Patient Name: MARIA SMITH\nPatient ID: MRN-772210\nDOB: 11/12/1978\nGender: Female\nDoctor Name: Dr. Sarah Jenkins\nHospital / Center: Marin County Health Clinic\nRequisition Date: 04/13/2026\nSample Type: Blood (whole); Sputum; Serum\nTests: Acid fast smear + culture; MTB/RIF PCR GeneXpert; Quantiferon TB Gold Plus; HIV screening; RPR syphilis screening\nNotes: Patient presents with night sweats, weight loss, and chronic cough. TB screening and routine STI panel requested. History of travel to high-burden TB areas in 2024."
+}

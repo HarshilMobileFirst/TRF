@@ -1,0 +1,55 @@
+{
+  "document_id": "f7a0d561-0aec-4d1a-972e-6febd692c422",
+  "status": "processed",
+  "source_file_name": "Mock_NSYMM_Lab_Requisition.pdf",
+  "extraction_provider": "openai",
+  "extraction_model": "gpt-5.2",
+  "extraction_note": null,
+  "extracted_data": {
+    "patient_name": "JONATHAN DOE",
+    "patient_id": "MRN-449012",
+    "age": null,
+    "gender": "Male",
+    "doctor_name": "Dr. Alex Rivera",
+    "hospital_or_center_name": "North Bay Community Clinic",
+    "requisition_date": "04/13/2026",
+    "sample_type": "Stool",
+    "test_names": [
+      "Enteric stool culture (Pathogen(s): STEC [Shiga toxin-producing E. coli])",
+      "Cryptosporidium + Giardia detection"
+    ],
+    "test_codes": [],
+    "priority": null,
+    "contact_number": null,
+    "notes": "Patient reports 4 days of watery diarrhea and abdominal cramping following a local fair visit. No recent travel history. Laboratory screening for enteric pathogens requested."
+  },
+  "confidence": {
+    "patient_name": 0.99,
+    "patient_id": 0.99,
+    "age": 0.0,
+    "gender": 0.99,
+    "doctor_name": 0.99,
+    "hospital_or_center_name": 0.99,
+    "requisition_date": 0.99,
+    "sample_type": 0.99,
+    "test_names": 0.99,
+    "test_codes": 0.0,
+    "priority": 0.0,
+    "contact_number": 0.0,
+    "notes": 0.99,
+    "extraction_confidence": 0.93
+  },
+  "validation": {
+    "status": "invalid",
+    "errors": [
+      "Unsupported sample type"
+    ],
+    "warnings": [
+      "Mismatch between number of test names and test codes"
+    ]
+  },
+  "created_at": "2026-04-13T14:02:16.961789",
+  "updated_at": "2026-04-13T14:02:16.961794",
+  "approved_at": null,
+  "ocr_text": "Patient Name: JONATHAN DOE\nPatient ID: MRN-449012\nGender: Male\nDoctor Name: Dr. Alex Rivera\nHospital / Center: North Bay Community Clinic\nRequisition Date: 04/13/2026\nSample Type: Stool\nTests: Enteric stool culture (Pathogen(s): STEC [Shiga toxin-producing E. coli]); Cryptosporidium + Giardia detection\nContact Number: (707) 555-9000\nNotes: Patient reports 4 days of watery diarrhea and abdominal cramping following a local fair visit. No recent travel history. Laboratory screening for enteric pathogens requested."
+}
