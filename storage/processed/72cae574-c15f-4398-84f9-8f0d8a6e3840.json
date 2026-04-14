@@ -1,0 +1,61 @@
+{
+  "document_id": "72cae574-c15f-4398-84f9-8f0d8a6e3840",
+  "status": "processed",
+  "source_file_name": "Mock_NSYMM_Lab_Requisition_V2.pdf",
+  "extraction_provider": "openai",
+  "extraction_model": "gpt-5.2",
+  "extraction_note": null,
+  "extracted_data": {
+    "patient_name": "Maria Smith",
+    "patient_id": "MRN-772210",
+    "age": 47,
+    "gender": "Female",
+    "doctor_name": "Dr. Sarah Jenkins",
+    "hospital_or_center_name": "Marin County Health Clinic",
+    "requisition_date": "04/13/2026",
+    "sample_type": "Blood (whole); Sputum; Serum",
+    "test_names": [
+      "Acid fast smear + culture",
+      "MTB/RIF PCR GeneXpert",
+      "Quantiferon TB Gold Plus",
+      "HIV screening",
+      "RPR syphilis screening"
+    ],
+    "test_codes": [
+      "ICD-10: R06.02 (Shortness of breath)"
+    ],
+    "priority": null,
+    "contact_number": null,
+    "notes": "Patient presents with night sweats, weight loss, and chronic cough. TB screening and routine STI panel requested. History of travel to high-burden TB areas in 2024."
+  },
+  "confidence": {
+    "patient_name": 0.99,
+    "patient_id": 0.99,
+    "age": 0.99,
+    "gender": 0.99,
+    "doctor_name": 0.99,
+    "hospital_or_center_name": 0.99,
+    "requisition_date": 0.99,
+    "sample_type": 0.99,
+    "test_names": 0.99,
+    "test_codes": 0.99,
+    "priority": 0.0,
+    "contact_number": 0.0,
+    "notes": 0.99,
+    "extraction_confidence": 0.93
+  },
+  "validation": {
+    "status": "invalid",
+    "errors": [
+      "Invalid or unknown test code: ICD-10: R06.02 (SHORTNESS OF BREATH)"
+    ],
+    "warnings": [
+      "Sample type normalized suggestion: Blood",
+      "Mismatch between number of test names and test codes"
+    ]
+  },
+  "created_at": "2026-04-14T05:15:31.057821",
+  "updated_at": "2026-04-14T05:15:31.057825",
+  "approved_at": null,
+  "ocr_text": "Patient Name: Maria Smith  \nPatient ID: MRN-772210  \nDOB: 11/12/1978  \nGender: Female  \nDoctor Name: Dr. Sarah Jenkins  \nHospital / Center: Marin County Health Clinic  \nRequisition Date: 04/13/2026  \nSample Type: Blood (whole); Sputum; Serum  \nTests: Acid fast smear + culture; MTB/RIF PCR GeneXpert; Quantiferon TB Gold Plus; HIV screening; RPR syphilis screening  \nTest Codes: ICD-10: R06.02 (Shortness of breath)  \nNotes: Patient presents with night sweats, weight loss, and chronic cough. TB screening and routine STI panel requested. History of travel to high-burden TB areas in 2024."
+}

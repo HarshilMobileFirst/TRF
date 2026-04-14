@@ -23,7 +23,7 @@ def _secret_scalar(key: str) -> str | None:
         return None
     try:
         raw = root[key]
-    except (KeyError, TypeError):
+    except Exception:
         try:
             if hasattr(root, "get"):
                 raw = root.get(key)
