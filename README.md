@@ -162,6 +162,27 @@ streamlit run streamlit_app/app.py
 
 The review UI will be available at `http://localhost:8501`.
 
+### Streamlit Community Cloud
+
+The Streamlit app runs on Streamlit’s servers. It **cannot** call `http://localhost:8000` on your laptop—that `localhost` is the Streamlit container, which is why you see **connection refused**.
+
+1. Deploy the FastAPI app to a **public** HTTPS URL (Railway, Render, Fly.io, your own VPS, etc.).
+2. In the Streamlit Cloud app: **Settings → Secrets**, add at least (**must be valid TOML**, not a raw shell `.env` unless you wrap it):
+
+   ```toml
+   TRF_API_BASE_URL = "https://your-api.example.com"
+   TRF_UI_USERNAME = "admin"
+   TRF_UI_PASSWORD = "same-as-backend-basic-auth"
+   ```
+
+   Pasting `KEY=value` lines without quotes can break TOML parsing, so the app may ignore them and keep using `localhost`. Either quote values as above, or put your whole `.env` inside a multiline `DOTENV = """ ... """` block (see [`.streamlit/secrets.toml.example`](.streamlit/secrets.toml.example)).
+
+   `OPENAI_API_KEY` in Streamlit Secrets does **not** change where the UI sends HTTP requests; only **`TRF_API_BASE_URL`** (or aliases in the example file) points the Streamlit app at your deployed FastAPI.
+
+   Redeploy or restart the Streamlit app after saving secrets.
+
+Locally you can still use `TRF_API_BASE_URL=http://127.0.0.1:8000` in the environment when you run `streamlit run`.
+
 ## API endpoints
 
 - `GET /health`

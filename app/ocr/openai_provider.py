@@ -1,5 +1,4 @@
 import base64
-import io
 import logging
 from typing import Any
 
@@ -72,14 +71,12 @@ class OpenAIOCRProvider(OCRProvider):
         ]
 
         if extension == "pdf":
-            uploaded_file = self._build_client().files.create(
-                file=(filename, io.BytesIO(file_bytes), "application/pdf"),
-                purpose="user_data",
-            )
             content.append(
                 {
                     "type": "input_file",
-                    "file_id": uploaded_file.id,
+                    "filename": filename,
+                    # Inline base64 avoids requiring Files API (`api.files.write`) scope.
+                    "file_data": f"data:application/pdf;base64,{base64.b64encode(file_bytes).decode('utf-8')}",
                 }
             )
             return content

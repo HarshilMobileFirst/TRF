@@ -2,15 +2,161 @@ from __future__ import annotations
 
 import json
 import os
-from pathlib import Path
+import re
 
 import requests
 import streamlit as st
 
 
-API_BASE_URL = os.getenv("TRF_API_BASE_URL", "http://localhost:8000")
-API_USERNAME = os.getenv("TRF_UI_USERNAME", os.getenv("TRF_AUTH_USERNAME", "admin"))
-API_PASSWORD = os.getenv("TRF_UI_PASSWORD", os.getenv("TRF_AUTH_PASSWORD", "changeme"))
+def _secrets_root():
+    """Streamlit Secrets are TOML; access can fail locally if no secrets file exists."""
+    try:
+        return st.secrets
+    except Exception:
+        return None
+
+
+def _secret_scalar(key: str) -> str | None:
+    """Read a string secret. Streamlit's Secrets may not implement `in` / `.get` reliably."""
+    root = _secrets_root()
+    if root is None:
+        return None
+    try:
+        raw = root[key]
+    except (KeyError, TypeError):
+        try:
+            if hasattr(root, "get"):
+                raw = root.get(key)
+                if raw is None:
+                    return None
+            else:
+                return None
+        except Exception:
+            return None
+    try:
+        if isinstance(raw, (dict, list)):
+            return None
+        text = str(raw).strip()
+        return text or None
+    except Exception:
+        return None
+
+
+def _parse_dotenv_text(text: str) -> dict[str, str]:
+    """Parse shell-style KEY=value lines (what people paste from a .env file)."""
+    out: dict[str, str] = {}
+    for line in text.splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.startswith("export "):
+            line = line[7:].strip()
+        m = re.match(r"^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$", line)
+        if not m:
+            continue
+        k, v = m.group(1), m.group(2).strip()
+        if len(v) >= 2 and v[0] == v[-1] and v[0] in "\"'":
+            v = v[1:-1]
+        out[k] = v
+    return out
+
+
+def _backend_url_from_streamlit_secrets() -> str | None:
+    """
+    Resolve FastAPI base URL from Streamlit Secrets.
+
+    Streamlit Secrets must be valid TOML. Pasting a raw .env file often fails TOML parsing
+    unless you use a multiline string under DOTENV (see .streamlit/secrets.toml.example).
+    """
+    root = _secrets_root()
+    if root is None:
+        return None
+
+    direct_keys = (
+        "TRF_API_BASE_URL",
+        "API_BASE_URL",
+        "BACKEND_URL",
+        "FASTAPI_URL",
+    )
+    for key in direct_keys:
+        v = _secret_scalar(key)
+        if v:
+            return v
+
+    # TOML table: [env] TRF_API_BASE_URL = "..."
+    try:
+        env_block = root.get("env") if hasattr(root, "get") else None
+        if isinstance(env_block, dict):
+            for key in direct_keys:
+                if key in env_block:
+                    v = str(env_block[key]).strip()
+                    if v:
+                        return v
+    except Exception:
+        pass
+
+    # Pasted .env body as one multiline string
+    for block_key in ("DOTENV", "dotenv", "ENV_FILE", "env_file"):
+        raw = _secret_scalar(block_key)
+        if raw and "=" in raw:
+            parsed = _parse_dotenv_text(raw)
+            for key in direct_keys:
+                if key in parsed and parsed[key].strip():
+                    return parsed[key].strip()
+
+    return None
+
+
+def _secret_first(secret_key: str) -> str | None:
+    v = _secret_scalar(secret_key)
+    if v:
+        return v
+    root = _secrets_root()
+    if root is not None:
+        try:
+            env_block = root.get("env") if hasattr(root, "get") else None
+            if isinstance(env_block, dict) and secret_key in env_block:
+                v = str(env_block[secret_key]).strip()
+                if v:
+                    return v
+        except Exception:
+            pass
+    for block_key in ("DOTENV", "dotenv", "ENV_FILE", "env_file"):
+        raw = _secret_scalar(block_key)
+        if raw:
+            parsed = _parse_dotenv_text(raw)
+            if secret_key in parsed and parsed[secret_key].strip():
+                return parsed[secret_key].strip()
+    return None
+
+
+def get_api_base_url() -> str:
+    """FastAPI public base URL. Local default; on Streamlit Cloud set TRF_API_BASE_URL in Secrets."""
+    # Prefer Streamlit Secrets first: Cloud may inject TRF_API_BASE_URL=localhost in the
+    # process environment, which would wrongly override a correct DOTENV / TOML value.
+    url = (_backend_url_from_streamlit_secrets() or "").strip()
+    if url:
+        return url.rstrip("/")
+    url = os.getenv("TRF_API_BASE_URL", "").strip()
+    if url:
+        return url.rstrip("/")
+    return "http://127.0.0.1:8000"
+
+
+def get_api_username() -> str:
+    for key in ("TRF_UI_USERNAME", "TRF_AUTH_USERNAME"):
+        v = _secret_first(key)
+        if v:
+            return v
+    return os.getenv("TRF_UI_USERNAME", os.getenv("TRF_AUTH_USERNAME", "admin"))
+
+
+def get_api_password() -> str:
+    for key in ("TRF_UI_PASSWORD", "TRF_AUTH_PASSWORD"):
+        v = _secret_first(key)
+        if v:
+            return v
+    return os.getenv("TRF_UI_PASSWORD", os.getenv("TRF_AUTH_PASSWORD", "changeme"))
 
 
 def _csv_to_list(value: str) -> list[str]:
@@ -41,23 +187,23 @@ def _normalize_form_payload(form_data: dict) -> dict:
 
 
 def auth():
-    return (API_USERNAME, API_PASSWORD)
+    return (get_api_username(), get_api_password())
 
 
 def api_get(path: str):
-    response = requests.get(f"{API_BASE_URL}{path}", auth=auth(), timeout=30)
+    response = requests.get(f"{get_api_base_url()}{path}", auth=auth(), timeout=30)
     response.raise_for_status()
     return response
 
 
 def api_post(path: str):
-    response = requests.post(f"{API_BASE_URL}{path}", auth=auth(), timeout=30)
+    response = requests.post(f"{get_api_base_url()}{path}", auth=auth(), timeout=30)
     response.raise_for_status()
     return response
 
 
 def api_put(path: str, payload: dict):
-    response = requests.put(f"{API_BASE_URL}{path}", json=payload, auth=auth(), timeout=30)
+    response = requests.put(f"{get_api_base_url()}{path}", json=payload, auth=auth(), timeout=30)
     response.raise_for_status()
     return response
 
@@ -70,7 +216,7 @@ def api_upload(uploaded_file):
             uploaded_file.type or "application/octet-stream",
         )
     }
-    response = requests.post(f"{API_BASE_URL}/trf/upload", files=files, auth=auth(), timeout=60)
+    response = requests.post(f"{get_api_base_url()}/trf/upload", files=files, auth=auth(), timeout=60)
     response.raise_for_status()
     return response
 
@@ -79,12 +225,21 @@ st.set_page_config(page_title="TRF Review Console", layout="wide")
 st.title("TRF Review Console")
 st.caption("FastAPI backend + Streamlit review workflow")
 
+_api_base = get_api_base_url()
+
 if "uploaded_this_session" not in st.session_state:
     st.session_state.uploaded_this_session = False
 if "last_uploaded_document_id" not in st.session_state:
     st.session_state.last_uploaded_document_id = None
 
 with st.sidebar:
+    st.caption(f"API: `{_api_base}`")
+    if "localhost" in _api_base or "127.0.0.1" in _api_base:
+        st.warning(
+            "**Hosted on Streamlit Cloud?** `localhost` here is the cloud server, not your PC—"
+            "uploads will fail until you deploy FastAPI publicly and set **Secrets → `TRF_API_BASE_URL`** "
+            "to that `https://...` URL (see `.streamlit/secrets.toml.example`)."
+        )
     st.subheader("Upload TRF")
     uploaded_file = st.file_uploader("Choose a PDF or image", type=["pdf", "png", "jpg", "jpeg"])
     if uploaded_file and st.button("Upload and process", use_container_width=True):
